@@ -1,0 +1,14 @@
+#version 330
+
+layout(location=0) in vec3 in_Position;
+layout(location=1) in vec3 in_Color;
+layout (location = 2) in vec2 vTexCoord; 
+//uniform mat4 transform; 
+uniform mat4 viewtransform; 
+out vec3 ex_Color;
+
+void main(void)
+{
+gl_Position = viewtransform*vec4(in_Position, 1.0);
+ex_Color = in_Color;
+}

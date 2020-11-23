@@ -1,0 +1,6 @@
+﻿  Camera.cpp
+  maingame.cpp
+C:\Users\MinU\source\repos\OPEN_UFOBURGER\UFOBURGER\UFOBURGER\maingame.cpp(37,1): warning C4305: '초기화 중': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\MinU\source\repos\OPEN_UFOBURGER\UFOBURGER\UFOBURGER\maingame.cpp(126,34): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  코드를 생성하고 있습니다...
+  UFOBURGER.vcxproj -> C:\Users\MinU\source\repos\OPEN_UFOBURGER\UFOBURGER\Debug\UFOBURGER.exe
