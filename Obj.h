@@ -1,6 +1,7 @@
 //우리가 사용할 모든 obj(햄버거 재료, ufo등) 는 여기에!
 #pragma once
 #include "Headers.h"
+
 class CObj
 {
 	explicit CObj();

@@ -151,6 +151,7 @@
     <ClInclude Include="filetobuf.h" />
     <ClInclude Include="Headers.h" />
     <ClInclude Include="Obj.h" />
+    <ClInclude Include="ReadObj.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="UI.h" />
   </ItemGroup>
