@@ -39,6 +39,9 @@
     <ClCompile Include="Obj.cpp">
       <Filter>소스 파일\Gameobj</Filter>
     </ClCompile>
+    <ClCompile Include="ccobjtest.cpp">
+      <Filter>소스 파일\Gameobj</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="filetobuf.h">

@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ccobjtest.cpp" />
     <ClCompile Include="maingame.cpp" />
     <ClCompile Include="Obj.cpp" />
     <ClCompile Include="sample.cpp" />

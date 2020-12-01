@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-//#include "Headers.h"
+#include "Headers.h"
 
 template<class T>
 bool CheckSame(T& container, int index_0, int index_1, int count)
@@ -32,23 +32,26 @@ bool ReadObj(const char* objFileName, float*& vPosOut, float*& vNormalOut, float
         return false;
     }
 
-    std::vector<float> rawPositionBuffer;
-    std::vector<float> rawNormalBuffer;
-    std::vector<float> rawTextureCoordinateBuffer;
+    std::vector<float> rawPositionBuffer; //obj 행좌표
+    std::vector<float> rawNormalBuffer;//노멀
+    std::vector<float> rawTextureCoordinateBuffer;//텍스쳐 매핑할 좌표
 
-    std::vector<int> rawPosIndexBuffer;
-    std::vector<int> rawNormalIndexBuffer;
+    std::vector<int> rawPosIndexBuffer;//실제코드에서 좌표를 인덱스로 사용?
+    std::vector<int> rawNormalIndexBuffer;//노멀도
     std::vector<int> rawTextureCoordinateIndexBuffer;
 
     float tempFloat;
     std::string tempString;
 
-    while (!in.eof())
+    while (!in.eof())//파일이 열려있는 동안
     {
-        in >> tempString;
+        in >> tempString;//파일내용 읽어서 tempstring에 복사
+        //obj의 좌표 정보는 .obj를 txt로 바꾸면 알 수 있음.
+        //즉, obj를 메모장으로 연 후 거기에 담겨있는 정보를 여기에 복사하겠다는 뜻.
+    //http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-7-model-loading/
 
-        if (tempString.size() == 1 && tempString[0] == 'v')
-        {
+        if (tempString.size() == 1 && tempString[0] == 'v')//
+        {//obj의 정점 좌표를 읽어오는 코드
             in >> tempFloat;
             rawPositionBuffer.push_back(tempFloat);
             in >> tempFloat;
@@ -57,7 +60,7 @@ bool ReadObj(const char* objFileName, float*& vPosOut, float*& vNormalOut, float
             rawPositionBuffer.push_back(tempFloat);
         }
         else if (tempString.size() == 2 && tempString[0] == 'v' && tempString[1] == 'n')
-        {
+        {//obj 정점의 노멀 좌표 읽는 코드
             in >> tempFloat;
             rawNormalBuffer.push_back(tempFloat);
             in >> tempFloat;
@@ -66,7 +69,7 @@ bool ReadObj(const char* objFileName, float*& vPosOut, float*& vNormalOut, float
             rawNormalBuffer.push_back(tempFloat);
         }
         else if (tempString.size() == 2 && tempString[0] == 'v' && tempString[1] == 't')
-        {
+        {//obj 정점의 텍스쳐 좌표 읽는 코드
             in >> tempFloat;
             rawTextureCoordinateBuffer.push_back(tempFloat);
             in >> tempFloat;
@@ -74,6 +77,12 @@ bool ReadObj(const char* objFileName, float*& vPosOut, float*& vNormalOut, float
         }
         else if (tempString.size() == 1 && tempString[0] == 'f')
         {
+            //면 읽어오는 코드
+            //a/b/c 로 나누어져 있음
+            //a: 정점의 인덱스(위에 v라고 나열되어 있는 애중 몇번쨰줄 읽어올 것인지)
+            //b: 텍스쳐 좌표의 인덱스(위에 vt라고 나열되어있는 애중 몇번쨰인지)
+            //c: 노멀 좌표의 인덱스(n이라고 나열되어잇는애들중...)
+
             for (int i = 0; i < 3; ++i)
             {
                 in >> tempString;

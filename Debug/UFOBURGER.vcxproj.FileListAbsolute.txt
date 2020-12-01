@@ -1,2 +1,4 @@
 C:\Users\user\Documents\2020-2ComputerGraphics\Debug\UFOBURGER.exe
 C:\Users\user\Documents\2020-2ComputerGraphics\Debug\UFOBURGER.pdb
+C:\Users\MinU\source\repos\UFOBURGER\OPEN-UFO-BURGER\Debug\UFOBURGER.exe
+C:\Users\MinU\source\repos\UFOBURGER\OPEN-UFO-BURGER\Debug\UFOBURGER.pdb
