@@ -57,7 +57,7 @@ void DrawObject(char name);
 
 glm::mat4 modelTransform(1.0f);
 //클래스 포인터 하나 부르고 널ptr로 초기화
-CCam *gamecam = nullptr;;
+CCam *gamecam = nullptr;
 void make_vertexShader()
 {
 	VertexSource = filetobuf((char*)"vertex.glsl");
@@ -191,7 +191,7 @@ void main(int argc, char** argv) {
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	ReadObj("desk.obj", vPosData[0], vNormalData[0], vTextureCoordinateData[0], indexData[0], vertexCount[0], indexCount);
+	ReadObj("bread2.obj", vPosData[0], vNormalData[0], vTextureCoordinateData[0], indexData[0], vertexCount[0], indexCount);
 	ReadObj("bread1.obj", vPosData[1], vNormalData[1], vTextureCoordinateData[1], indexData[1], vertexCount[1], indexCount);
 
 	InitShader();
