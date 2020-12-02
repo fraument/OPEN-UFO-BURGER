@@ -30,17 +30,23 @@
     <ClCompile Include="sample.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>소스 파일\Gameobj</Filter>
-    </ClCompile>
     <ClCompile Include="maingame.cpp">
       <Filter>소스 파일\gameplay</Filter>
     </ClCompile>
     <ClCompile Include="Obj.cpp">
       <Filter>소스 파일\Gameobj</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>소스 파일\GameUIs</Filter>
+    </ClCompile>
     <ClCompile Include="ccobjtest.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Bread.cpp">
       <Filter>소스 파일\Gameobj</Filter>
+    </ClCompile>
+    <ClCompile Include="Desk.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -49,9 +55,6 @@
     </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>소스 파일\GameUIs</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>소스 파일\Gameobj</Filter>
     </ClInclude>
     <ClInclude Include="Headers.h">
       <Filter>헤더 파일</Filter>
@@ -63,6 +66,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ReadObj.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>소스 파일\GameUIs</Filter>
+    </ClInclude>
+    <ClInclude Include="Bread.h">
+      <Filter>소스 파일\Gameobj</Filter>
+    </ClInclude>
+    <ClInclude Include="Desk.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

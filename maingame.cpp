@@ -14,15 +14,37 @@
 //#include <ctime>
 //#include <random>
 //#include <math.h>
+//#include <vector>
 //#include "Camera.h"
 //#include "Obj.h"
+//#include "ReadObj.h"
+//#include "Bread.h"
+//#include "Desk.h"
+//
+//#define OBJECT_COLOR	glm::vec3(0.4, 0.7, 1.0)
+//#define LIGHT_AMBIENT	glm::vec3(0.1, 0.1, 0.1)
+//#define LIGHT_POS		glm::vec3(50.0, 50.0, 0.0)
+//#define LIGHT_COLOR		glm::vec3(1.0, 1.0, 1.0)
 //
 //GLvoid drawScene(GLvoid);
 //GLvoid Reshape(int w, int h);
 //GLchar* VertexSource, * FragmentSource; // 소스코드 저장 변수
 //GLuint VertexShader, FragmentShader; // 세이더 객체
 //GLuint s_program;
-//GLuint VAO[4], VBO[4];
+//
+//GLuint vao[7];//빵 1 빵 2 고기 야채 토마토 치즈 책상
+//vector<GLuint> vbo;
+//vector<GLuint> ebo;
+//
+//float* vPosData[2];
+//float* vNormalData[2];
+//float* vTextureCoordinateData[2];
+//int* indexData[2];
+//int vertexCount[2];
+//int indexCount;
+//float degree_lightPos = 0.0f;
+//
+//int i = 0;
 ////vao와 vbo 배열 사용, 각 오브젝트마다 vao 하나와 vbo 두개 사용
 ////VAO[0]-->플레인 (vbo[0]: 플레인 좌표, vbo[1]:플레인 색깔)
 //GLvoid Keyboard(unsigned char key, int x, int y);
@@ -30,6 +52,7 @@
 //void SpecialKeyboard(int key, int x, int y);
 //void Timerfunction(int value);
 //void InitializeOBJs();
+//void DrawObject(char name);
 //
 ////한 객체를 이동하기 위해서는 다음 세 종류의 행렬이 필요하다.
 ////플레인의 경우 변환이 필요없으나 기본형으로 써둠
@@ -37,23 +60,12 @@
 //
 ////클래스 포인터 하나 부르고 널ptr로 초기화
 //CCam *gamecam = nullptr;
-//
-//float floorPos[] = {
-//	//바닥 플레인부분
-//	   0.8, -0.5, 1.0, -0.8, -0.5, 1.0,
-//   -0.8, -0.5, -1.0, 0.8, -0.5, -1.0
-//
-//};
-//
-////바닥컬러
-//float floorCol[] = {
-//	0.0,0.0,1.0, 1.0,1.0,1.0,
-//	1.0,0.0,0.0, 0.0,1.0,0.0
-//};
-//
+//CObj* gameObj = nullptr;
+//CBread* bread = new CBread;
+//CDesk* desk = new CDesk;
 //void make_vertexShader()
 //{
-//	VertexSource = filetobuf((char*)"vertex.txt");
+//	VertexSource = filetobuf((char*)"vertex.glsl");
 //	//--- 버텍스 세이더 객체 만들기
 //	VertexShader = glCreateShader(GL_VERTEX_SHADER);
 //	//--- 세이더 코드를 세이더 객체에 넣기
@@ -74,7 +86,7 @@
 //
 //void make_fragmentShader()
 //{
-//	FragmentSource = filetobuf((char*)"fragment.txt");
+//	FragmentSource = filetobuf((char*)"fragment.glsl");
 //	//--- 프래그먼트 세이더 객체 만들기
 //	FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 //	//--- 세이더 코드를 세이더 객체에 넣기
@@ -94,24 +106,65 @@
 //}
 //
 //void InitBuffer() {
-//	glGenVertexArrays(1, &VAO[0]);
-//	glBindVertexArray(VAO[0]);
+//	//테스트큐브 버퍼
+//	
+//	glGenVertexArrays(1, &vao[0]);
+//	glBindVertexArray(vao[0]);
+//	vbo[0] = 1;
+//	glGenBuffers(1, &vbo[0]);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+//	glBufferData(GL_ARRAY_BUFFER, vertexCount[0] * sizeof(float) * 3, vPosData[0], GL_STATIC_DRAW);
 //
-//	glGenBuffers(1, &VBO[0]);
-//	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(floorPos), floorPos, GL_STATIC_DRAW);
+//	int posLocation1 = glGetAttribLocation(s_program, "in_position");
+//	glVertexAttribPointer(posLocation1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
+//	glEnableVertexAttribArray(posLocation1);
 //
-//	GLint pAttribute1 = glGetAttribLocation(s_program, "in_Position");
-//	glVertexAttribPointer(pAttribute1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-//	glEnableVertexAttribArray(pAttribute1);
+//	glGenBuffers(1, &vbo[1]);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+//	glBufferData(GL_ARRAY_BUFFER, vertexCount[0] * sizeof(float) * 3, vNormalData[0], GL_STATIC_DRAW);
+//	int normalLocation1 = glGetAttribLocation(s_program, "in_normal");
+//	glVertexAttribPointer(normalLocation1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
+//	glEnableVertexAttribArray(normalLocation1);
 //
-//	glGenBuffers(1, &VBO[1]);
-//	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(floorCol), floorCol, GL_STATIC_DRAW);
+//	glGenBuffers(1, &vbo[2]);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+//	glBufferData(GL_ARRAY_BUFFER, vertexCount[0] * sizeof(float) * 2, vTextureCoordinateData[0], GL_STATIC_DRAW);
+//	int uvLocation1 = glGetAttribLocation(s_program, "in_uv");
+//	glVertexAttribPointer(uvLocation1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, NULL);
+//	glEnableVertexAttribArray(uvLocation1);
 //
-//	GLint cAttribute2 = glGetAttribLocation(s_program, "in_Color");
-//	glVertexAttribPointer(cAttribute2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-//	glEnableVertexAttribArray(cAttribute2);
+//	glGenBuffers(1, &ebo[0]);
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
+//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(int), indexData[0], GL_STATIC_DRAW);
+//
+//	//토마토 모델링 버퍼
+//	glGenVertexArrays(1, &vao[1]);
+//	glBindVertexArray(vao[1]);
+//
+//	glGenBuffers(1, &vbo[3]);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+//	glBufferData(GL_ARRAY_BUFFER, vertexCount[1] * sizeof(float) * 3, vPosData[1], GL_STATIC_DRAW);
+//	int posLocation2 = glGetAttribLocation(s_program, "in_position");
+//	glVertexAttribPointer(posLocation2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
+//	glEnableVertexAttribArray(posLocation2);
+//
+//	glGenBuffers(1, &vbo[4]);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+//	glBufferData(GL_ARRAY_BUFFER, vertexCount[1] * sizeof(float) * 3, vNormalData[1], GL_STATIC_DRAW);
+//	int normalLocation2 = glGetAttribLocation(s_program, "in_normal");
+//	glVertexAttribPointer(normalLocation2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
+//	glEnableVertexAttribArray(normalLocation2);
+//
+//	glGenBuffers(1, &vbo[5]);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+//	glBufferData(GL_ARRAY_BUFFER, vertexCount[1] * sizeof(float) * 2, vTextureCoordinateData[1], GL_STATIC_DRAW);
+//	int uvLocation2 = glGetAttribLocation(s_program, "in_uv");
+//	glVertexAttribPointer(uvLocation2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, NULL);
+//	glEnableVertexAttribArray(uvLocation2);
+//
+//	glGenBuffers(1, &ebo[1]);
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[1]);
+//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(int), indexData[1], GL_STATIC_DRAW);
 //
 //}
 //
@@ -142,6 +195,11 @@
 //	glutCreateWindow("OPEN!UFO BURGER");
 //	glewExperimental = GL_TRUE;
 //	glewInit();
+//
+//	ReadObj("desk.obj", vPosData[0], vNormalData[0], vTextureCoordinateData[0], indexData[0], vertexCount[0], indexCount);
+//	ReadObj("bread1.obj", vPosData[1], vNormalData[1], vTextureCoordinateData[1], indexData[1], vertexCount[1], indexCount);
+//	vbo.reserve(10);
+//	ebo.reserve(10);
 //	InitShader();
 //	InitBuffer();
 //	InitializeOBJs();
@@ -170,56 +228,111 @@
 //}
 //GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수 
 //{
-//	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 //	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //
 //	//카메라 클래스에서 카메라값매번 받아와서그림
 //	glUseProgram(s_program);
-//	glm::mat4 view = glm::mat4(1.0f);
-//	view = glm::lookAt(gamecam->GetCamPos(), gamecam->GetCamDir(), gamecam->GetCamUp());
-//	unsigned int viewLocation = glGetUniformLocation(s_program, "viewtransform"); //--- 버텍스 세이더에서 viewTransform 변수위치
-//	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 //
-//	//임시로 그린 플레인 그리기. 나중에 한번만그리도록수정예정
-//	glBindVertexArray(VAO[0]);
-//	glDrawArrays(GL_QUADS, 0, 12);
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//	glBindVertexArray(vao[0]);
+//	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+//
+//	glBindVertexArray(vao[1]);
+//	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+//
+//	//모델 위치들
+//	//glm::mat4 modelTransform = glm::mat4(1.0f);
+//	//modelTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+//
+//	desk->DrawDesk(s_program);
+//	bread->Draw(s_program);
+//
+//	//카메라 부분
+//	glm::vec4 cameraPos = glm::rotate(glm::mat4(1.0f), glm::radians(gamecam->camDegree), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(gamecam->cameraPos, 1.0f);
+//	glm::mat4 view = glm::lookAt(glm::vec3(cameraPos), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+//	glm::mat4 proj = glm::perspective(glm::radians(60.0f), 800 / (float)600, 0.001f, 1000.f);
+//
+//	//모델 위치 다시그리기
+//	//bread = dynamic_cast<CBread*>(gameObj);
+//	GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
+//	glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(bread->GetModelTransform()));
+//
+//	//뷰&투영
+//	GLuint viewLocation = glGetUniformLocation(s_program, "g_view");
+//	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+//
+//	GLuint projectLocation = glGetUniformLocation(s_program, "g_projection");
+//	glUniformMatrix4fv(projectLocation, 1, GL_FALSE, glm::value_ptr(proj));
+//
+//	////라이트 관리는 나중엥 ㅠ
+//
+//	glm::vec3 lightAmbient = LIGHT_AMBIENT;
+//	GLuint lightAmbientLocation = glGetUniformLocation(s_program, "g_lightAmbient");
+//	glUniform3fv(lightAmbientLocation, 1, (float*)&lightAmbient);
+//
+//	glm::vec3 lightPos = LIGHT_POS;
+//	GLuint lightPosLocation = glGetUniformLocation(s_program, "g_lightPos");
+//	glUniform3fv(lightPosLocation, 1, (float*)&lightPos);
+//
+//	glm::vec3 lightColor = LIGHT_COLOR;
+//	GLuint lightColorLocation = glGetUniformLocation(s_program, "g_lightColor");
+//	glUniform3fv(lightColorLocation, 1, (float*)&lightColor);
+//
+//	glm::vec3 objColor = OBJECT_COLOR;
+//	GLuint objColorLocation = glGetUniformLocation(s_program, "g_objectColor");
+//	glUniform3fv(objColorLocation, 1, (float*)&objColor);
+//
+//	//GLuint cameraPosLocation = glGetUniformLocation(s_program, "g_cameraPos");
+//	//glUniform3fv(cameraPosLocation, 1, (float*)&cameraPos);
 //
 //	glutSwapBuffers(); // 화면에 출력하기
 //}
 //
 //GLvoid Keyboard(unsigned char key, int x, int y)
 //{
+//	CBread* tempbread;
 //	switch (key) {
 //
 //		//카메라수정하는거,, 굳ㅇ이신경쓸필요 ㄴ
 //	case 'w':
-//		gamecam->SetCamPOS(1);
+//		bread->MoveBread();
+//		//i++;
+//		//gamecam->SetCamPOS(1);
 //		break;
 //
 //	case 's':
-//		gamecam->SetCamPOS(2);
+//		degree_lightPos += 5.0f;
+//		//gamecam->SetCamPOS(2);
 //		break;
 //
 //	case 'a':
-//		gamecam->SetCamPOS(3);
+//		gamecam->camDegree -= 10.0f;
+//		//gamecam->SetCamPOS(3);
 //		break;
 //
 //	case 'd':
-//		gamecam->SetCamPOS(4);
+//		gamecam->camDegree += 10.0f;
+//		//gamecam->SetCamPOS(4);
 //		break;
 //
 //	case 'q':
-//		gamecam->SetCamPOS(5);
+//		//gamecam->SetCamPOS(5);
 //		break;
 //
 //	case 'e':
 //		gamecam->SetCamPOS(6);
 //		break;
 //
+//	case 'b':
+//		tempbread = new CBread;
+//		DrawObject('B');
+//		break;
+//
 //	case 'Q':
 //		delete gamecam;
 //		gamecam = nullptr;
+//		/*delete gameObj;
+//		gameObj = nullptr;*/
 //		exit(0);
 //		break;
 //
@@ -227,7 +340,11 @@
 //
 //	glutPostRedisplay(); //--- 배경색이 바뀔때마다 출력 콜백함수를 호출하여 화면을 refresh 한다
 //}
+//void DrawObject(char name) {
+//	if (name == 'B') {//bread
 //
+//	}
+//}
 //void Timerfunction(int value) {
 //
 //
@@ -251,41 +368,3 @@
 //	glViewport(0, 0, w, h);
 //}
 //
-//void ReadObj(FILE* objFile)
-//{
-//	//--- 1. 전체 버텍스 개수 및 삼각형 개수 세기
-//	char count[100];
-//	int vertexNum = 0;
-//	int faceNum = 0;
-//	while (!feof(objFile)) {
-//		fscanf(objFile, "%s", count);
-//		if (count[0] == 'v' && count[1] == '\0')
-//			vertexNum += 1;
-//		else if (count[0] == 'f' && count[1] == '\0')
-//			faceNum += 1;
-//		memset(count, '\0', sizeof(count)); // 배열 초기화
-//	}
-//	//--- 2. 메모리 할당
-//	vec4 * vertex;
-//	vec4* face;
-//	int vertIndex = 0;
-//	int faceIndex = 0;
-//	vertex = (vec4*)malloc(sizeof(vec4) * vertexNum);
-//	face = (vec4*)malloc(sizeof(vec4) * faceNum);
-//
-//	//--- 3. 할당된 메모리에 각 버텍스, 페이스 정보 입력
-//	while (!feof(objFile)) {
-//		fscanf(objFile, "%s", bind);
-//		if (bind[0] == 'v' && bind[1] == '\0') {
-//			fscanf(objFile, "%f %f %f",
-//				&vertex[vertIndex].x, &vertex[vertIndex].y,
-//				&vertex[vertIndex].z);
-//			vertIndex++;
-//		}
-//		else if (bind[0] == 'f' && bind[1] == '\0') {
-//			fscanf(objFile, "%f %f %f",
-//				&face[faceIndex].x, &face[faceIndex].y, &face[faceIndex].z);
-//			faceIndex++;
-//		}
-//	}
-//}

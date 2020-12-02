@@ -140,15 +140,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bread.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ccobjtest.cpp" />
+    <ClCompile Include="Desk.cpp" />
     <ClCompile Include="maingame.cpp" />
     <ClCompile Include="Obj.cpp" />
     <ClCompile Include="sample.cpp" />
     <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bread.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Desk.h" />
     <ClInclude Include="filetobuf.h" />
     <ClInclude Include="Headers.h" />
     <ClInclude Include="Obj.h" />

@@ -3,12 +3,14 @@
 layout(location=0) in vec3 in_Position;
 layout(location=1) in vec3 in_Color;
 layout (location = 2) in vec2 vTexCoord; 
-//uniform mat4 transform; 
-uniform mat4 viewtransform; 
+uniform mat4 transform; 
+
 out vec3 ex_Color;
+out vec2 TexCoord;
 
 void main(void)
 {
-gl_Position = viewtransform*vec4(in_Position, 1.0);
+gl_Position = transform * vec4(in_Position, 1.0);
 ex_Color = in_Color;
+TexCoord = vTexCoord; 
 }

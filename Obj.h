@@ -1,16 +1,21 @@
-////우리가 사용할 모든 obj(햄버거 재료, ufo등) 는 여기에!
-//#pragma once
-//#include "Headers.h"
-//
-//class CObj
-//{
-//	explicit CObj();
-//	~CObj();
-//
-//private:
-//	//obj의 기본 정보(좌표, 컬러)
-//	//매트릭스는 카메라가 대신 할 것이기 때문에 좌표와 컬러정보만 하면 됨.
-//	//클래스에 추가하기 힘들면 그냥 한 파일로 된 코드 줘도 됨 내가 클래스화하겟음
-//
-//};
-//
+//우리가 사용할 모든 obj(햄버거 재료, ufo등) 는 여기에!
+//부모가 될 것이다.
+#pragma once
+#include "Headers.h"
+
+class CObj
+{
+public:
+	CObj();
+	~CObj();
+	glm::mat4 GetModelTransform();
+	void MoveBread();
+	void DrawObject();
+
+protected:
+	//각 obj는 움직여야 함
+	glm::mat4 modelTransform = glm::mat4(1.0f);
+	glm::mat4 modelTranslate = glm::mat4(1.0f);
+	glm::mat4 modelRotate = glm::mat4(1.0f);
+};
+
