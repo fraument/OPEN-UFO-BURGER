@@ -142,11 +142,13 @@
   <ItemGroup>
     <ClCompile Include="BurgerSimulator.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Obj.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="filetobuf.h" />
     <ClInclude Include="Headers.h" />
+    <ClInclude Include="Obj.h" />
     <ClInclude Include="ReadObj.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
