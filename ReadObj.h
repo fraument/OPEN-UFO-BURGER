@@ -183,5 +183,6 @@ bool ReadObj(const char* objFileName, float*& vPosOut, float*& vNormalOut, float
         indexOut[i] = oldIndexToNewIndexDict[dupIndexBuffer[i]];
     }
 
+    cout << "readobj" << endl;
     return true;
 }
