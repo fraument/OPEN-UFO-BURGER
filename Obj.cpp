@@ -1,34 +1,23 @@
 #include "Obj.h"
-Obj::Obj() {
+
+Obj::Obj(int idx) {
+	//idx=0 , badak sangja
+	if (idx == 0) {
+		modelTransform[3][1] = 0.0f;
+	}
 	modelTransform = glm::mat4(1.0f);
-	modelRotate = glm::mat4(1.0f);
-	modelTranslate = glm::mat4(1.0f);
-	fSpeed = (rand() % 10) / 10.0f;
+	modelTransform = glm::translate(modelTransform, glm::vec3(0.0f, 0.8f, 0.0f));
 }
 Obj::~Obj()
 {
 
 }
-void Obj::Translate() {
-	//객체이동
-	modelTranslate= glm::translate(glm::mat4(0.1f), glm::vec3(0.1f, 0, 0));
-	modelTransform = modelTranslate * modelRotate;
-}
-//void Obj::Rotate() {
-//	//객체회전
-//	
-//}
-glm::mat4 Obj::GetTrans_Matrix() {
-	//현재 매트릭스 정보 가져옴
-	//modelRotate = glm::rotate(modelTranslate, glm::radians(10.0f), glm::vec3(1.0, 0.0, 0.0));
-	//modelTransform = modelTranslate * modelRotate;
-	return modelTransform;
-	
-}
-void Obj::SetMatrix(glm::mat4 Temp,int idx) {
-	if (idx == 2) {
-		modelTranslate = Temp;
+void Obj::PrintMatrix() {
+	double dArray[16] = { 0.0 };
+	const float* pSource = (const float*)glm::value_ptr(modelTransform);
+	for (int i = 0; i < 16; ++i) {
+		dArray[i] = pSource[i];
+		cout << dArray[i] << " ";
 	}
-	modelTransform = modelTranslate * modelRotate;
+		
 }
-

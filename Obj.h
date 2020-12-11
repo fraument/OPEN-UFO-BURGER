@@ -3,17 +3,14 @@
 class Obj
 {
 public:
-
-	Obj();
+	Obj(int idx);
 	~Obj();
-	glm::mat4 GetTrans_Matrix();
-	void Translate();
-	void SetMatrix(glm::mat4 Temp,int idx);
-
-public:
+	glm::mat4 GetTransform_Matrix() { return modelTransform; };
+	void SetTrans_Matrix(glm::mat4 Temp) { modelTransform = Temp; };
+	void PrintMatrix();//yÁÂÇ¥
+	float ReturnPos() { return modelTransform[3][1]; }
+private:
 	glm::mat4 modelTransform;
-	glm::mat4 modelTranslate;
-	glm::mat4 modelRotate = glm::mat4(1.0f);
-	float fSpeed;
+	glm::vec3 modelColor;
 };
 
