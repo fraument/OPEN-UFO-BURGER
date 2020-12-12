@@ -97,6 +97,7 @@ glm::mat4 modelTransform(1.0f);
 //CCam* gamecam = nullptr;
 Camera* maincam = nullptr;
 Obj* gameobj[NUMOFOBJ];
+
 void make_vertexShader()
 {
     VertexSource = filetobuf((char*)"vertex.txt");
@@ -211,7 +212,20 @@ void main(int argc, char** argv) {
 
     for (int i = 0; i < 100; i++) {
         gameobj[i] = new Obj(i);
+        if (i > 0 && i % 2 == 1) {
+            glm::mat4 Temp = glm::translate(gameobj[i]->GetTransform_Matrix(), glm::vec3(-5.0f, 0.0f, 0.0f));
+            gameobj[i]->SetTrans_Matrix(Temp);
+            //bDir = true;
+            cout << gameobj[i] << endl;
+        }
+        if (i > 0 && i % 2 == 0) {
+            glm::mat4 Temp = glm::translate(gameobj[i]->GetTransform_Matrix(), glm::vec3(5.0f, 0.0f, 0.0f));
+            gameobj[i]->SetTrans_Matrix(Temp);
+            //bDir = false;
+            cout << gameobj[i] << endl;
+        }
     }
+
     srand(unsigned(time(NULL)));
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -340,10 +354,12 @@ GLvoid Keyboard(unsigned char key, int x, int y)
         break;
 
     case 'q':
+    case 'Q':
         delete maincam;
         maincam = nullptr;
         delete* gameobj;
         *gameobj = nullptr;
+        PlaySound(NULL, 0, 0);
         exit(0);
         break;
 
@@ -355,15 +371,6 @@ GLvoid Keyboard(unsigned char key, int x, int y)
         idx++;
         maincam->cameraPos.x += 1.0f;
         maincam->cameraPos.y += 2.0f;
-        break;
-
-    case 'Q':
-        delete maincam;
-        maincam = nullptr;
-        delete* gameobj;
-        *gameobj = nullptr;
-        PlaySound(NULL, 0, 0);
-        exit(0);
         break;
 
     }
@@ -398,8 +405,7 @@ void Timerfunction(int value) {
 
             //행렬 대각선 원소들 접근해서 값 바꾸기
             glm::mat4 TempS = glm::scale(gameobj[idx]->GetTransform_Matrix(), glm::vec3(1.0f - gapX, 0.0f, 0.0f));
-        
-        
+
         
         }
         if (gameobj[idx]->ReturnPos(1) >1.0f*(idx-1)) {
@@ -414,21 +420,25 @@ void Timerfunction(int value) {
     if (isTurn) { //이제 쌓을 애가 양옆으로 움직이는 코드
         if (bDir == true) {
             xztime++;
-            if (xztime == 30) {
+            if (xztime == 60) {
+                xztime = 0;
                 bDir = false;
             }
             glm::mat4 Temp = glm::translate(gameobj[idx + 1]->GetTransform_Matrix(), glm::vec3(0.2f, 0.0f, 0.0f));
             gameobj[idx + 1]->SetTrans_Matrix(Temp);
+           
         }
 
         if (bDir == false) {
-            xztime--;
-            if (xztime == -30) {
+            xztime++;
+            if (xztime == 60) {
+                xztime = 0;
                 bDir = true;
             }
             glm::mat4 Temp = glm::translate(gameobj[idx + 1]->GetTransform_Matrix(), glm::vec3(-0.2f, 0.0f, 0.0f));
             //여기서부턴 안건드려도 됨
             gameobj[idx + 1]->SetTrans_Matrix(Temp);
+            
         }
         Objmvp[idx + 1] = gameobj[idx + 1]->GetTransform_Matrix();
         GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
