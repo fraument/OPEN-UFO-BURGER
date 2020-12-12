@@ -35,3 +35,16 @@ Obj::~Obj()
 void Obj::PrintMatrix() {
 	cout << modelTransform[3][1] << endl;
 }
+float Obj::ReturnPos(int idx) {
+	//x°ª
+	if (idx == 0) {
+		return modelTransform[3][0];
+	}
+	//y°ª
+	if (idx == 1) {
+		return modelTransform[3][1];
+	}
+	if (idx == 2) {
+		return modelTransform[3][2];
+	}
+}

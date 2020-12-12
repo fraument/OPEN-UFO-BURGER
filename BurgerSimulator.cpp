@@ -272,7 +272,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
     glUseProgram(s_program);
     glCullFace(GL_BACK);
     //카메라 부분
-    maincam->SetCamPOS();
+    //maincam->SetCamPOS();
     glm::vec4 cameraPos = glm::rotate(glm::mat4(1.0f), glm::radians(maincam->camDegree), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(maincam->cameraPos, 1.0f);
     glm::mat4 view = glm::lookAt(glm::vec3(cameraPos), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 proj = glm::perspective(glm::radians(60.0f), 800 / (float)600, 0.001f, 1000.f);
@@ -348,10 +348,13 @@ GLvoid Keyboard(unsigned char key, int x, int y)
         break;
 
     case 'b':
+    case 'B':
         //버튼 눌렀을 때 현재 상자가(idx) 하강하도록
         isDropped = true;
         isTurn = false;
         idx++;
+        maincam->cameraPos.x += 1.0f;
+        maincam->cameraPos.y += 2.0f;
         break;
 
     case 'Q':
@@ -384,13 +387,22 @@ void DrawObject() {
 
 void Timerfunction(int value) {
     if (isDropped == true) {
-        if (gameobj[idx]->ReturnPos() <= 1.0f * (idx - 1)) {
+        if (gameobj[idx]->ReturnPos(1) <= 1.0f * (idx - 1)) {
             isDropped = false;
             isTurn = true;//하강 끝! 다음 애가 좌우 움직임 시작
-            cout << "하강 끝!" << endl;
-           
+
+            //그리고 이전에있던거 차이만큼 scale해야함
+            float gapX = fabs(gameobj[idx]->ReturnPos(0) - gameobj[idx - 1]->ReturnPos(0));
+            float gapZ = fabs(gameobj[idx]->ReturnPos(2) - gameobj[idx - 1]->ReturnPos(2));
+            cout << gapX << "," << gapZ << endl;
+
+            //행렬 대각선 원소들 접근해서 값 바꾸기
+            glm::mat4 TempS = glm::scale(gameobj[idx]->GetTransform_Matrix(), glm::vec3(1.0f - gapX, 0.0f, 0.0f));
+        
+        
+        
         }
-        if (gameobj[idx]->ReturnPos() >1.0f*(idx-1)) {
+        if (gameobj[idx]->ReturnPos(1) >1.0f*(idx-1)) {
             glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(0.0f, -0.1f, 0.0f));
             gameobj[idx]->SetTrans_Matrix(Temp);
             Objmvp[idx] = gameobj[idx]->GetTransform_Matrix();
@@ -402,7 +414,7 @@ void Timerfunction(int value) {
     if (isTurn) { //이제 쌓을 애가 양옆으로 움직이는 코드
         if (bDir == true) {
             xztime++;
-            if (xztime == 20) {
+            if (xztime == 30) {
                 bDir = false;
             }
             glm::mat4 Temp = glm::translate(gameobj[idx + 1]->GetTransform_Matrix(), glm::vec3(0.2f, 0.0f, 0.0f));
@@ -411,13 +423,13 @@ void Timerfunction(int value) {
 
         if (bDir == false) {
             xztime--;
-            if (xztime == -20) {
+            if (xztime == -30) {
                 bDir = true;
             }
             glm::mat4 Temp = glm::translate(gameobj[idx + 1]->GetTransform_Matrix(), glm::vec3(-0.2f, 0.0f, 0.0f));
+            //여기서부턴 안건드려도 됨
             gameobj[idx + 1]->SetTrans_Matrix(Temp);
         }
-
         Objmvp[idx + 1] = gameobj[idx + 1]->GetTransform_Matrix();
         GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
         glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[idx + 1]));
