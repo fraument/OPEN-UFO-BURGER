@@ -1,23 +1,47 @@
 #include "Obj.h"
 
 Obj::Obj(int idx) {
-	//idx=0 , badak sangja
+	int randcol = rand() % 5;
+	modelTransform = glm::mat4(1.0f);
+
 	if (idx == 0) {
 		modelTransform[3][1] = 0.0f;
+		//modelTransform = glm::translate(modelTransform, glm::vec3(0.0f, -0.5f, 0.0f));
+		modelColor = glm::vec3(0.9, 0.7, 0.5);
 	}
-	modelTransform = glm::mat4(1.0f);
-	modelTransform = glm::translate(modelTransform, glm::vec3(0.0f, 0.8f, 0.0f));
+	if (idx > 0) {
+		modelTransform[3][1] = 1.0f;
+		//modelTransform = glm::translate(modelTransform, glm::vec3(0.0f, 0.8f, 0.0f));
+	}
+	if (randcol == 0) {//빵!
+		modelColor = glm::vec3(0.9,0.7,0.5 );
+	}
+	if (randcol == 1) {//치즈
+		modelColor = glm::vec3(0.95, 0.8, 0.1);
+	}
+	if (randcol == 2) {//토마토
+		modelColor = glm::vec3(0.9, 0.0, 0.0);
+	}
+	if (randcol == 3) {//야채
+		modelColor = glm::vec3(0.0, 0.7, 0.2);
+	}
+	if (randcol == 4) {//패티
+		modelColor = glm::vec3(0.6, 0.3, 0.1);
+	}
+	
+	
+	cout << modelTransform[3][1] << endl;
 }
 Obj::~Obj()
 {
 
 }
 void Obj::PrintMatrix() {
-	double dArray[16] = { 0.0 };
+	/*double dArray[16] = { 0.0 };
 	const float* pSource = (const float*)glm::value_ptr(modelTransform);
 	for (int i = 0; i < 16; ++i) {
 		dArray[i] = pSource[i];
 		cout << dArray[i] << " ";
-	}
-		
+	}*/
+	cout << modelTransform[3][1] << endl;
 }

@@ -198,7 +198,7 @@ void InitShader()
 }
 
 void main(int argc, char** argv) {
-    system("mode con cols=40 lines=20 | title GUI");
+   // system("mode con cols=40 lines=20 | title GUI");
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), LIGHTBLUE);
  
     vPosData.assign(20, NULL);
@@ -300,9 +300,12 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
     GLuint lightColorLocation = glGetUniformLocation(s_program, "g_lightColor");
     glUniform3fv(lightColorLocation, 1, (float*)&lightColor);
 
-    glm::vec3 objColor = OBJECT_COLOR;
-    GLuint objColorLocation = glGetUniformLocation(s_program, "g_objectColor");
-    glUniform3fv(objColorLocation, 1, (float*)&objColor);
+    for (int i = 0; i <= idx; i++) {
+        glm::vec3 objColor = gameobj[i]->GetModelCol();
+        GLuint objColorLocation = glGetUniformLocation(s_program, "g_objectColor");
+        glUniform3fv(objColorLocation, 1, (float*)&objColor);
+    }
+    
 
     //GLuint cameraPosLocation = glGetUniformLocation(s_program, "g_cameraPos");
     //glUniform3fv(cameraPosLocation, 1, (float*)&cameraPos);
@@ -310,7 +313,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
     glutSwapBuffers(); // 화면에 출력하기
 }
 void CheckPos() {
-    for (int i = 0; i <= idx; i++) {
+    for (int i = 0; i <= idx+1; i++) {
         cout << i << ": " << endl;
         gameobj[i]->PrintMatrix();//최종 매트릭스의 어디 부분에 y좌표 저장되는지 볼라고 씀 
     }
@@ -380,24 +383,21 @@ void DrawObject() {
 }
 void Timerfunction(int value) {
     if (isDropped == true) {
-        if (times>=10) {
+        if (gameobj[idx]->ReturnPos() <= 1.0f * (idx - 1)) {
             isDropped = false;
             isTurn = true;//하강 끝! 다음 애가 좌우 움직임 시작
-            times = 0;
+            //times = 0;
         }
-        
-        //목표 좌표는 어디인가?-->이전 블럭의 y좌표
-        //목표 좌표일 때까지 0.1f씩 하강
-        //아마 [3][1]값이 바뀌는거같은데!!!!!!!!머리가!!안돌아가
         //gameobj[idx]->ReturnPos() < gameobj[idx - 1]->ReturnPos()
-
-        if (times<10) {
+        //한 블럭당 1.0f씩 차지함 즉 0번째는 0.0 1번째는 1.0...거기까지 가도록 짬
+        if (gameobj[idx]->ReturnPos() >1.0f*(idx-1)) {
             glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(0.0f, -0.1f, 0.0f));
             gameobj[idx]->SetTrans_Matrix(Temp);
             Objmvp[idx] = gameobj[idx]->GetTransform_Matrix();
             GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
             glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[idx]));
-            times++;
+            //times++;
+            
         }
     }
 
