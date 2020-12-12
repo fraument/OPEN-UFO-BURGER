@@ -6,12 +6,10 @@ Obj::Obj(int idx) {
 
 	if (idx == 0) {
 		modelTransform[3][1] = 0.0f;
-		//modelTransform = glm::translate(modelTransform, glm::vec3(0.0f, -0.5f, 0.0f));
 		modelColor = glm::vec3(0.9, 0.7, 0.5);
 	}
 	if (idx > 0) {
-		modelTransform[3][1] = 1.0f;
-		//modelTransform = glm::translate(modelTransform, glm::vec3(0.0f, 0.8f, 0.0f));
+		modelTransform[3][1] = 1.0f*idx;
 	}
 	if (randcol == 0) {//»§!
 		modelColor = glm::vec3(0.9,0.7,0.5 );
@@ -28,8 +26,6 @@ Obj::Obj(int idx) {
 	if (randcol == 4) {//ÆÐÆ¼
 		modelColor = glm::vec3(0.6, 0.3, 0.1);
 	}
-	
-	
 	cout << modelTransform[3][1] << endl;
 }
 Obj::~Obj()
@@ -37,11 +33,5 @@ Obj::~Obj()
 
 }
 void Obj::PrintMatrix() {
-	/*double dArray[16] = { 0.0 };
-	const float* pSource = (const float*)glm::value_ptr(modelTransform);
-	for (int i = 0; i < 16; ++i) {
-		dArray[i] = pSource[i];
-		cout << dArray[i] << " ";
-	}*/
 	cout << modelTransform[3][1] << endl;
 }
