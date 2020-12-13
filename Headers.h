@@ -11,4 +11,5 @@
 #include <iostream>
 #include <random>
 #include <ctime>
+#include <time.h>
 using namespace std;
