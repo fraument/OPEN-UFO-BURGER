@@ -1,4 +1,3 @@
-//메인게임. 여기서 다 돌리고 클래스 멤버함수 변수만 가져옴
 #include <iostream>
 using namespace std;
 
@@ -11,12 +10,22 @@ using namespace std;
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 
+<<<<<<< Updated upstream
 #define BGM "cheeseburgerF"
 
 int idx = 1;
 //버튼 누름!하강!!이 트루폴스?
+=======
+#define BGM "Summerlove"
+
+struct GameSystem {
+
+};
+GameSystem sys;
+
+int idx = 1;
+>>>>>>> Stashed changes
 bool isDropped = false;
-//하나 도착했고 다음애가 왔다리갔다리하는가?트루폴스.
 bool isTurn = true;
 int times = 0;
 bool bDir=true;
@@ -333,6 +342,15 @@ GLvoid Keyboard(unsigned char key, int x, int y)
         isTurn = false;
         maincam->cameraPos.x += 1.5f;
         maincam->cameraPos.y += 1.0f;
+<<<<<<< Updated upstream
+=======
+        break;
+
+    case 'v':
+        if ((GetAsyncKeyState(VK_LEFT) & 0x8000)) {
+            cout<<"동시입력중!"<<endl;
+        }
+>>>>>>> Stashed changes
         break;
 
     }
@@ -365,6 +383,7 @@ void Timerfunction(int value) {
             float gapZ = (20.0f-fabs(gameobj[idx]->ReturnPos(2) - gameobj[idx - 1]->ReturnPos(2)))/20.0f;
             //cout << gapX << "," << gapZ << endl;
 
+<<<<<<< Updated upstream
             //for (int i = idx; i < 100; i++) {
             //    glm::mat4 TempS = glm::scale(gameobj[idx]->GetTransform_Matrix(), glm::vec3(gapX, 1.0f,gapZ));
             //    gameobj[i]->SetTrans_Matrix(TempS,1);//scale 
@@ -373,6 +392,8 @@ void Timerfunction(int value) {
             //    glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[i]));
             //}
             //행렬 대각선 원소들 접근해서 값 바꾸기
+=======
+>>>>>>> Stashed changes
             idx++;
 
         }
