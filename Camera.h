@@ -13,7 +13,7 @@ public:
 	void SetCamPOS();
 
 public:
-	glm::vec3 cameraPos = glm::vec3(8.0f, 8.0f, 1.0f);
-	float camDegree = 45.0f;
+	glm::vec3 cameraPos = glm::vec3(10.0f, 10.0f, 1.0f);
+	float camDegree = -25.0f;
 };
 

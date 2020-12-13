@@ -3,14 +3,21 @@
 Obj::Obj(int idx) {
 	int randcol = rand() % 5;
 	modelTransform = glm::mat4(1.0f);
-
+	modelScale= glm::mat4(1.0f);
 	if (idx == 0) {
 		modelTransform[3][1] = 0.0f;
 		modelColor = glm::vec3(0.9, 0.7, 0.5);
 	}
-	if (idx > 0) {
+	if (idx > 0&&idx%2==1) {
 		modelTransform[3][1] = 1.0f*idx;
+		modelTransform[3][0] = -3.0f;
 	}
+
+	if (idx > 0 && idx % 2 == 0) {
+		modelTransform[3][1] = 1.0f * idx;
+		modelTransform[3][0] = 3.0f;
+	}
+
 	if (randcol == 0) {//»§!
 		modelColor = glm::vec3(0.9,0.7,0.5 );
 	}
@@ -26,15 +33,15 @@ Obj::Obj(int idx) {
 	if (randcol == 4) {//ÆÐÆ¼
 		modelColor = glm::vec3(0.6, 0.3, 0.1);
 	}
-	cout << modelTransform[3][1] << endl;
 }
 Obj::~Obj()
 {
 
 }
 void Obj::PrintMatrix() {
-	cout << modelTransform[3][1] << endl;
+	cout << modelTransform[3][0] << endl;
 }
+
 float Obj::ReturnPos(int idx) {
 	//x°ª
 	if (idx == 0) {
@@ -46,5 +53,15 @@ float Obj::ReturnPos(int idx) {
 	}
 	if (idx == 2) {
 		return modelTransform[3][2];
+	}
+}
+void Obj::SetTrans_Matrix(glm::mat4 Temp, int num) {
+	if (num == 0)//trans
+	{
+		modelTransform = Temp;
+	}
+	if (num == 1) {//scale
+		modelScale = Temp;
+		modelTransform =  modelScale*modelTransform;
 	}
 }
