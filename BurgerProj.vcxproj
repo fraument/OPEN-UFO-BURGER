@@ -175,6 +175,7 @@
     <ClInclude Include="Headers.h" />
     <ClInclude Include="Obj.h" />
     <ClInclude Include="ReadObj.h" />
+    <ClInclude Include="RhyInfo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
