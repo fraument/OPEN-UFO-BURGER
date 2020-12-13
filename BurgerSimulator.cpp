@@ -30,7 +30,7 @@ using namespace std;
 
 #define BGM "cheeseburgerF"
 
-int idx = 0;
+int idx = 1;
 //버튼 누름!하강!!이 트루폴스?
 bool isDropped = false;
 //하나 도착했고 다음애가 왔다리갔다리하는가?트루폴스.
@@ -57,7 +57,6 @@ float Uicols[] = {
 #define LIGHT_AMBIENT   glm::vec3(0.5, 0.5, 0.5)
 #define LIGHT_POS      glm::vec3(15.0, 10.0, 0.0)
 #define LIGHT_COLOR      glm::vec3(1.0, 1.0, 1.0)
-#define OBJSPEED 0.06f
 #define NUMOFOBJ 100
 
 GLvoid drawScene(GLvoid);
@@ -80,7 +79,7 @@ vector<int>vertexCount;
 
 int indexCount;
 float degree_lightPos = 0.0f;
-
+float ObjSpeed = 0.5f;
 int i = 0;
 //vao와 vbo 배열 사용, 각 오브젝트마다 vao 하나와 vbo 두개 사용
 //VAO[0]-->플레인 (vbo[0]: 플레인 좌표, vbo[1]:플레인 색깔)
@@ -212,18 +211,6 @@ void main(int argc, char** argv) {
 
     for (int i = 0; i < 100; i++) {
         gameobj[i] = new Obj(i);
-        if (i > 0 && i % 2 == 1) {
-            glm::mat4 Temp = glm::translate(gameobj[i]->GetTransform_Matrix(), glm::vec3(-5.0f, 0.0f, 0.0f));
-            gameobj[i]->SetTrans_Matrix(Temp);
-            //bDir = true;
-            cout << gameobj[i] << endl;
-        }
-        if (i > 0 && i % 2 == 0) {
-            glm::mat4 Temp = glm::translate(gameobj[i]->GetTransform_Matrix(), glm::vec3(5.0f, 0.0f, 0.0f));
-            gameobj[i]->SetTrans_Matrix(Temp);
-            //bDir = false;
-            cout << gameobj[i] << endl;
-        }
     }
 
     srand(unsigned(time(NULL)));
@@ -262,7 +249,7 @@ void main(int argc, char** argv) {
     PlaySound(TEXT(BGM), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 
 
-    glutTimerFunc(100, Timerfunction, 1);
+    glutTimerFunc(50, Timerfunction, 1);
     glutMouseFunc(Mouse);
     glutKeyboardFunc(Keyboard); // 키보드 입력 콜백함수 지정
     glutSpecialFunc(SpecialKeyboard);
@@ -320,7 +307,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
     glutSwapBuffers(); // 화면에 출력하기
 }
 void CheckPos() {
-    for (int i = 0; i <= idx+1; i++) {
+    for (int i = 0; i <= idx; i++) {
         cout << i << ": " << endl;
         gameobj[i]->PrintMatrix();//최종 매트릭스의 어디 부분에 y좌표 저장되는지 볼라고 씀 
     }
@@ -366,18 +353,25 @@ GLvoid Keyboard(unsigned char key, int x, int y)
     case 'b':
     case 'B':
         //버튼 눌렀을 때 현재 상자가(idx) 하강하도록
+        if (idx % 2 == 1) {
+            bDir = true;//음-->약(++)
+        }
+        else if (idx % 2 == 0) {
+            bDir = false;//양-->음(--)
+        }
         isDropped = true;
         isTurn = false;
-        idx++;
         maincam->cameraPos.x += 1.0f;
         maincam->cameraPos.y += 2.0f;
+        cout << idx+1 << ": ";
+        gameobj[idx+1]->PrintMatrix();
         break;
 
     }
 }
 void DrawObject() {
     //0부터 내려온애까지 오브젝트 그림. 안건드려도 됨
-    for (int i = 0; i <= idx+1; i++) {
+    for (int i = 0; i <= idx; i++) {
         Objmvp[i] = gameobj[i]->GetTransform_Matrix();
         GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
         glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[i]));
@@ -395,19 +389,23 @@ void DrawObject() {
 void Timerfunction(int value) {
     if (isDropped == true) {
         if (gameobj[idx]->ReturnPos(1) <= 1.0f * (idx - 1)) {
-            isDropped = false;
-            isTurn = true;//하강 끝! 다음 애가 좌우 움직임 시작
+            cout << idx << "번째 사각형 드롭됨: ";
+            gameobj[idx]->PrintMatrix();
 
+            isDropped = false;
+            idx++;
+            isTurn = true;//하강 끝! 다음 애가 좌우 움직임 시작
+           
             //그리고 이전에있던거 차이만큼 scale해야함
             float gapX = fabs(gameobj[idx]->ReturnPos(0) - gameobj[idx - 1]->ReturnPos(0));
             float gapZ = fabs(gameobj[idx]->ReturnPos(2) - gameobj[idx - 1]->ReturnPos(2));
-            cout << gapX << "," << gapZ << endl;
+            //cout << gapX << "," << gapZ << endl;
 
             //행렬 대각선 원소들 접근해서 값 바꾸기
             glm::mat4 TempS = glm::scale(gameobj[idx]->GetTransform_Matrix(), glm::vec3(1.0f - gapX, 0.0f, 0.0f));
 
-        
         }
+
         if (gameobj[idx]->ReturnPos(1) >1.0f*(idx-1)) {
             glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(0.0f, -0.1f, 0.0f));
             gameobj[idx]->SetTrans_Matrix(Temp);
@@ -418,38 +416,61 @@ void Timerfunction(int value) {
     }
 
     if (isTurn) { //이제 쌓을 애가 양옆으로 움직이는 코드
-        if (bDir == true) {
-            xztime++;
-            if (xztime == 60) {
-                xztime = 0;
-                bDir = false;
+        if (idx % 2 == 0) {//양수.음수쪽으로 더많이 가야함
+            if (bDir == true) {
+                if (gameobj[idx]->ReturnPos(0) >= 10.0f) {
+                    bDir = false;
+                }
+                glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(ObjSpeed, 0.0f, 0.0f));
+                gameobj[idx]->SetTrans_Matrix(Temp);
+
             }
-            glm::mat4 Temp = glm::translate(gameobj[idx + 1]->GetTransform_Matrix(), glm::vec3(0.2f, 0.0f, 0.0f));
-            gameobj[idx + 1]->SetTrans_Matrix(Temp);
-           
+
+            if (bDir == false) {
+                if (gameobj[idx]->ReturnPos(0) <= -10.0f) {
+                    bDir = true;
+                }
+                glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(-ObjSpeed, 0.0f, 0.0f));
+                //여기서부턴 안건드려도 됨
+                gameobj[idx]->SetTrans_Matrix(Temp);
+
+            }
+            Objmvp[idx] = gameobj[idx]->GetTransform_Matrix();
+            GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
+            glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[idx]));
         }
 
-        if (bDir == false) {
-            xztime++;
-            if (xztime == 60) {
-                xztime = 0;
-                bDir = true;
+        if (idx % 2 == 1) {//음수.양수쪽으로 더!
+            if (bDir == true) {
+                if (gameobj[idx]->ReturnPos(0) >= 10.0f) {
+                    bDir = false;
+                }
+                glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(ObjSpeed, 0.0f, 0.0f));
+                gameobj[idx]->SetTrans_Matrix(Temp);
+
             }
-            glm::mat4 Temp = glm::translate(gameobj[idx + 1]->GetTransform_Matrix(), glm::vec3(-0.2f, 0.0f, 0.0f));
-            //여기서부턴 안건드려도 됨
-            gameobj[idx + 1]->SetTrans_Matrix(Temp);
-            
+
+            if (bDir == false) {
+                if (gameobj[idx]->ReturnPos(0)<=-10.0f) {
+                    bDir = true;
+                }
+                glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(-ObjSpeed, 0.0f, 0.0f));
+                //여기서부턴 안건드려도 됨
+                gameobj[idx]->SetTrans_Matrix(Temp);
+
+            }
+            Objmvp[idx] = gameobj[idx]->GetTransform_Matrix();
+            GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
+            glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[idx]));
         }
-        Objmvp[idx + 1] = gameobj[idx + 1]->GetTransform_Matrix();
-        GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
-        glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[idx + 1]));
     }
+        
 
     if (idx > 20) { //난이도 조절 카메라 빙글빙글
         maincam->camDegree -= 10.0f;
     }
     glutPostRedisplay(); // 화면 재 출력
-    glutTimerFunc(100, Timerfunction, 1);
+    glutTimerFunc(50, Timerfunction, 1);
 
 }
 

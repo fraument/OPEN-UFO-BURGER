@@ -8,9 +8,16 @@ Obj::Obj(int idx) {
 		modelTransform[3][1] = 0.0f;
 		modelColor = glm::vec3(0.9, 0.7, 0.5);
 	}
-	if (idx > 0) {
+	if (idx > 0&&idx%2==1) {
 		modelTransform[3][1] = 1.0f*idx;
+		modelTransform[3][0] = -3.0f;
 	}
+
+	if (idx > 0 && idx % 2 == 0) {
+		modelTransform[3][1] = 1.0f * idx;
+		modelTransform[3][0] = 3.0f;
+	}
+
 	if (randcol == 0) {//»§!
 		modelColor = glm::vec3(0.9,0.7,0.5 );
 	}
@@ -26,15 +33,15 @@ Obj::Obj(int idx) {
 	if (randcol == 4) {//ÆÐÆ¼
 		modelColor = glm::vec3(0.6, 0.3, 0.1);
 	}
-	cout << modelTransform[3][1] << endl;
 }
 Obj::~Obj()
 {
 
 }
 void Obj::PrintMatrix() {
-	cout << modelTransform[3][1] << endl;
+	cout << modelTransform[3][0] << endl;
 }
+
 float Obj::ReturnPos(int idx) {
 	//x°ª
 	if (idx == 0) {

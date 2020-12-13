@@ -1,4 +1,4 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(477,5): warning MSB8004: Output 디렉터리가 슬래시로 끝나지 않습니다. Output 디렉터리의 적절한 평가를 허용하는 데 필요하므로 이 빌드 인스턴스에서 슬래시를 추가합니다.
   BurgerSimulator.cpp
-C:\Users\user\Documents\2020-2ComputerGraphics\BurgerSimulator.cpp(203,34): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
-  BurgerProj.vcxproj -> C:\Users\user\Documents\2020-2ComputerGraphics\/include\BurgerProj.exe
+C:\Users\MinU\Desktop\burgersim\BurgerProj\BurgerProj\BurgerSimulator.cpp(202,34): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  BurgerProj.vcxproj -> C:\Users\MinU\Desktop\burgersim\BurgerProj\include\BurgerProj.exe
