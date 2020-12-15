@@ -9,7 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <string>
 #include <random>
 #include <ctime>
 #include <time.h>
+#include <windows.h>
 using namespace std;

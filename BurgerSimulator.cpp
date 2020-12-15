@@ -1,28 +1,27 @@
-#include <iostream>
-using namespace std;
-
 #include <vector>
 #include "Camera.h"
 #include "ReadObj.h"
 #include "Obj.h"
 #include "filetobuf.h"
+#include "RhyInfo.h"
 #include <Windows.h>
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
-
 #define BGM "Summerlove"
 
 struct GameSystem {
+    int idx = 1;
+    bool isDropped = false;
+    bool isTurn = true;
+    bool bDir = true;
+    float ObjSpeed = 1.2f;
+    float BgColR = 0.25;
+    float BgColB = 0.75f;
 
+    int RhyIdx = 1;
+    //clock_t clock
 };
 GameSystem sys;
-
-int idx = 1;
-bool isDropped = false;
-bool isTurn = true;
-int times = 0;
-bool bDir=true;
-int xztime = 0;
 
 void textcolor(int foreground, int background)
 {
@@ -30,7 +29,6 @@ void textcolor(int foreground, int background)
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
 
-#define OBJECT_COLOR   glm::vec3(1.0, 0.7, 1.0)
 #define LIGHT_AMBIENT   glm::vec3(0.5, 0.5, 0.5)
 #define LIGHT_POS      glm::vec3(15.0, 10.0, 0.0)
 #define LIGHT_COLOR      glm::vec3(1.0, 1.0, 1.0)
@@ -55,9 +53,8 @@ vector<int*> indexData;
 vector<int>vertexCount;
 
 int indexCount;
-float ObjSpeed = 1.2f;
-float BgColR = 0.25;
-float BgColB = 0.75f;
+int badCount = 0;
+int pressButton = 0;
 
 GLvoid Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
@@ -65,11 +62,9 @@ void SpecialKeyboard(int key, int x, int y);
 void Timerfunction(int value);
 void InitializeOBJs();
 void DrawObject();
-void CheckPos();
-
-glm::mat4 modelTransform(1.0f);
-//클래스 포인터 하나 부르고 널ptr로 초기화
-//CCam* gamecam = nullptr;
+void CompareRhythm(char key, int sec);
+void UpdatesysInfo();
+void InfoList(int num);
 Camera* maincam = nullptr;
 Obj* gameobj[NUMOFOBJ];
 
@@ -116,7 +111,6 @@ void make_fragmentShader()
 }
 
 void InitBuffer() {
-    //int IdxMax = NUMOFOBJ;
     glGenVertexArrays(1, &vao[0]);
     glBindVertexArray(vao[0]);
 
@@ -153,8 +147,6 @@ void InitBuffer() {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[i]);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(int), indexData[i], GL_STATIC_DRAW);
     }
-    
-    cout << "세팅 완료!" << endl;
 }
 
 void InitShader()
@@ -176,9 +168,6 @@ void InitShader()
 }
 
 void main(int argc, char** argv) {
-   // system("mode con cols=40 lines=20 | title GUI");
-    //SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), LIGHTBLUE);
- 
     vPosData.assign(100, NULL);
     vNormalData.assign(100, NULL);
     vTextureCoordinateData.assign(100, NULL);
@@ -197,7 +186,7 @@ void main(int argc, char** argv) {
     glutCreateWindow("OPEN!UFO BURGER");
     glewExperimental = GL_TRUE;
     glewInit();
-    
+
     ReadObj("st.obj", vPosData[0], vNormalData[0], vTextureCoordinateData[0], indexData[0], vertexCount[0], indexCount);
 
     for (int i = 0; i < 100; i++) {
@@ -207,10 +196,19 @@ void main(int argc, char** argv) {
         indexData[i] = indexData[0];
         vertexCount[i] = vertexCount[0];
     }
-
+    SetVecData();
     InitShader();
     InitBuffer();
     InitializeOBJs();
+
+    
+    if (pressButton == 0) {
+        for (int i = 0; i < 5; i++) {
+            cout << RhythmInfo[i].key1 << " ";
+        }
+        cout << '\n';
+    }
+    
 
     if (glewInit() != GLEW_OK) // glew 초기화
     {
@@ -220,19 +218,20 @@ void main(int argc, char** argv) {
     else {
         //textcolor(RED, WHITE);
         std::cout << "GLEW Initialized\n";
-        //cout << "1. 색상변경 2.뭐넣지? 3.종료 어쩌구" << endl;
     }
     PlaySound(TEXT(BGM), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+
 
 
     glutTimerFunc(50, Timerfunction, 1);
     glutMouseFunc(Mouse);
     glutKeyboardFunc(Keyboard); // 키보드 입력 콜백함수 지정
+    //glutKeyboardUpFunc(KeyboardUp);
     glutSpecialFunc(SpecialKeyboard);
     glutDisplayFunc(drawScene); // 출력 함수의 지정
     glutReshapeFunc(Reshape); // 다시 그리기 함수 지정
     glutMainLoop(); // 이벤트 처리 시작 
-    
+
 }
 void InitializeOBJs() {
     //nullptr일때 새로 생성(안하면터짐 새클래스쓸때마다 무조건!)
@@ -242,14 +241,14 @@ void InitializeOBJs() {
 
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수 
 {
-    glClearColor(BgColR, 0.0f, BgColB, 1.0f);
+    glClearColor(sys.BgColR, 0.0f, sys.BgColB, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //카메라 클래스에서 카메라값매번 받아와서그림
     glUseProgram(s_program);
     glCullFace(GL_BACK);
     //카메라 부분
-    //maincam->SetCamPOS();
+
     glm::vec4 cameraPos = glm::rotate(glm::mat4(1.0f), glm::radians(maincam->camDegree), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(maincam->cameraPos, 1.0f);
     glm::mat4 view = glm::lookAt(glm::vec3(cameraPos), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 proj = glm::perspective(glm::radians(60.0f), 800 / (float)600, 0.001f, 1000.f);
@@ -277,36 +276,50 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
     GLuint lightColorLocation = glGetUniformLocation(s_program, "g_lightColor");
     glUniform3fv(lightColorLocation, 1, (float*)&lightColor);
 
+    /*if (pressButton == 10) {
+        system("cls");
+        pressButton = 0;
+    }*/
+
     //GLuint cameraPosLocation = glGetUniformLocation(s_program, "g_cameraPos");
     //glUniform3fv(cameraPosLocation, 1, (float*)&cameraPos);
 
     glutSwapBuffers(); // 화면에 출력하기
 }
-void CheckPos() {
-    for (int i = 0; i <= idx; i++) {
-        cout << i << ": " << endl;
-        gameobj[i]->PrintMatrix();//최종 매트릭스의 어디 부분에 y좌표 저장되는지 볼라고 씀 
-    }
-   
-}
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
     switch (key) {
-
-        //카메라수정하는거,, 굳ㅇ이신경쓸필요 ㄴ
-    case 'w':
-        gameobj[idx]->PrintMatrix();
-        break;
-
-    case 's':
-        break;
 
     case 'a':
         maincam->camDegree -= 10.0f;
         break;
 
     case 'd':
-        maincam->camDegree += 10.0f;
+        pressButton++;
+        InfoList(pressButton);
+        CompareRhythm('d', clock());
+        UpdatesysInfo();
+        break;
+
+    case 'f':
+        pressButton++;
+        InfoList(pressButton);
+        CompareRhythm('f', clock());
+        UpdatesysInfo();
+        break;
+
+    case 'j':
+        pressButton++;
+        InfoList(pressButton);
+        CompareRhythm('j', clock());
+        UpdatesysInfo();
+        break;
+
+    case 'k':
+        pressButton++;
+        InfoList(pressButton);
+        CompareRhythm('k', clock());
+        UpdatesysInfo();
         break;
 
     case 'q':
@@ -319,140 +332,239 @@ GLvoid Keyboard(unsigned char key, int x, int y)
         exit(0);
         break;
 
-    case 'b':
-    case 'B':
-        cout<<clock()<<endl;
-        //버튼 눌렀을 때 현재 상자가(idx) 하강하도록
-        if (idx % 2 == 1) {
-            bDir = true;//음-->약(++)
-        }
-        else if (idx % 2 == 0) {
-            bDir = false;//양-->음(--)
-        }
-        BgColR -= 0.003f;
-        BgColB -= 0.005f;
-        isDropped = true;
-        isTurn = false;
-        maincam->cameraPos.x += 1.5f;
-        maincam->cameraPos.y += 1.0f;
-        break;
-
     case 'v':
-        if ((GetAsyncKeyState(VK_LEFT) & 0x8000)) {
-            cout<<"동시입력중!"<<endl;
+        if ((GetAsyncKeyState('a') & 0x8000)) {
+            cout << "동시입력중!" << endl;
         }
         break;
 
     }
 }
+
+void UpdatesysInfo() {
+    if (sys.idx % 2 == 1) {
+        sys.bDir = true;//음-->약(++)
+    }
+    else if (sys.idx % 2 == 0) {
+        sys.bDir = false;//양-->음(--)
+    }
+    sys.BgColR -= 0.003f;
+    sys.BgColB -= 0.005f;
+    sys.isDropped = true;
+    sys.isTurn = false;
+    maincam->cameraPos.x += 1.5f;
+    maincam->cameraPos.y += 1.0f;
+    sys.RhyIdx++;
+}
+
 void DrawObject() {
-    //0부터 내려온애까지 오브젝트 그림. 안건드려도 됨
-    for (int i = 0; i <= idx; i++) {
+    //0부터 내려온애까지 오브젝트 그림
+    for (int i = 0; i <= sys.idx; i++) {
         Objmvp[i] = gameobj[i]->GetTransform_Matrix();
         GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
         glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[i]));
-        
+
         glm::vec3 objColor = gameobj[i]->GetModelCol();
         ObjCol[i] = gameobj[i]->GetModelCol();
         GLuint objColorLocation = glGetUniformLocation(s_program, "g_objectColor");
         glUniform3fv(objColorLocation, 1, glm::value_ptr(ObjCol[i]));
-        
+
         glBindVertexArray(vao[0]);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     }
 }
+void CompareRhythm(char key, int sec) {
+    int fabsGapoftime = fabs(RhythmInfo[sys.RhyIdx - 1].milisec - sec);
+    cout << "절댓값:" << fabsGapoftime << endl;
+
+    if (RhythmInfo[sys.RhyIdx - 1].key1 == key) {
+        if (fabsGapoftime <= 250) cout << "Great!" << endl;
+    }
+
+    if (fabsGapoftime > 250 && fabsGapoftime <= 350) cout << "Good" << endl;
+
+
+    if (fabsGapoftime > 350 && fabsGapoftime <= 450) {
+        cout << "Bad" << endl;
+
+            if (RhythmInfo[sys.RhyIdx - 1].milisec > 26000) { // 연습시간 이후
+                badCount++;
+                cout << "Bad 횟수 : " << badCount << endl;
+            }
+            if (badCount == 3) exit(0);
+        }
+
+
+    if (RhythmInfo[sys.RhyIdx - 1].key1 != key) {
+        if (RhythmInfo[sys.RhyIdx - 1].milisec > 26000) {
+            badCount++;
+            cout << "Bad 횟수 : " << badCount << endl;
+            if (badCount == 3) exit(0);
+        }
+        
+    }
+
+
+}
 
 void Timerfunction(int value) {
-    if (isDropped == true) {
-        if (gameobj[idx]->ReturnPos(1) <= 1.0f * (idx - 1)) {
-            isDropped = false;
-            isTurn = true;//하강 끝! 다음 애가 좌우 움직임 시작
-           
-            //그리고 이전에있던거 차이만큼 scale해야함
-            float gapX = (20.0f-fabs(gameobj[idx]->ReturnPos(0) - gameobj[idx - 1]->ReturnPos(0)))/20.0f;
-            float gapZ = (20.0f-fabs(gameobj[idx]->ReturnPos(2) - gameobj[idx - 1]->ReturnPos(2)))/20.0f;
-            //cout << gapX << "," << gapZ << endl;
-
-            idx++;
-
+    if (sys.isDropped == true) {
+        if (gameobj[sys.idx]->ReturnPos(1) <= 1.0f * (sys.idx - 1)) {
+            sys.isDropped = false;
+            sys.isTurn = true;//하강 끝! 다음 애가 좌우 움직임 시작
+            sys.idx++;
         }
 
-        if (gameobj[idx]->ReturnPos(1) > 1.0f*(idx-1)) {
-            glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(0.0f, -0.1f, 0.0f));
-            gameobj[idx]->SetTrans_Matrix(Temp,0);
-            Objmvp[idx] = gameobj[idx]->GetTransform_Matrix();
+        if (gameobj[sys.idx]->ReturnPos(1) > 1.0f * (sys.idx - 1)) {
+            glm::mat4 Temp = glm::translate(gameobj[sys.idx]->GetTransform_Matrix(), glm::vec3(0.0f, -0.1f, 0.0f));
+            gameobj[sys.idx]->SetTrans_Matrix(Temp, 0);
+            Objmvp[sys.idx] = gameobj[sys.idx]->GetTransform_Matrix();
             GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
-            glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[idx]));
+            glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[sys.idx]));
         }
     }
 
-    if (isTurn) { //이제 쌓을 애가 양옆으로 움직이는 코드
-        if (idx % 2 == 0) {//양수.음수쪽으로 더많이 가야함
-            if (bDir == true) {
-                if (gameobj[idx]->ReturnPos(0) >= 12.0f) {
-                    bDir = false;
+    if (sys.isTurn) { //이제 쌓을 애가 양옆으로 움직이는 코드
+        if (sys.idx % 2 == 0) {//양수.음수쪽으로 더많이 가야함
+            if (sys.bDir == true) {
+                if (gameobj[sys.idx]->ReturnPos(0) >= 12.0f) {
+                    sys.bDir = false;
                 }
-                glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(ObjSpeed, 0.0f, 0.0f));
-                gameobj[idx]->SetTrans_Matrix(Temp,0);
-
+                glm::mat4 Temp = glm::translate(gameobj[sys.idx]->GetTransform_Matrix(), glm::vec3(sys.ObjSpeed, 0.0f, 0.0f));
+                gameobj[sys.idx]->SetTrans_Matrix(Temp, 0);
             }
 
-            if (bDir == false) {
-                if (gameobj[idx]->ReturnPos(0) <= -12.0f) {
-                    bDir = true;
+            if (sys.bDir == false) {
+                if (gameobj[sys.idx]->ReturnPos(0) <= -12.0f) {
+                    sys.bDir = true;
                 }
-                glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(-ObjSpeed, 0.0f, 0.0f));
-                //여기서부턴 안건드려도 됨
-                gameobj[idx]->SetTrans_Matrix(Temp,0);
+                glm::mat4 Temp = glm::translate(gameobj[sys.idx]->GetTransform_Matrix(), glm::vec3(-sys.ObjSpeed, 0.0f, 0.0f));
+                gameobj[sys.idx]->SetTrans_Matrix(Temp, 0);
 
             }
-            Objmvp[idx] = gameobj[idx]->GetTransform_Matrix();
+            Objmvp[sys.idx] = gameobj[sys.idx]->GetTransform_Matrix();
             GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
-            glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[idx]));
+            glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[sys.idx]));
         }
 
-        if (idx % 2 == 1) {//음수.양수쪽으로 더!
-            if (bDir == true) {
-                if (gameobj[idx]->ReturnPos(0) >= 10.0f) {
-                    bDir = false;
+        if (sys.idx % 2 == 1) {//음수.양수쪽으로 더!
+            if (sys.bDir == true) {
+                if (gameobj[sys.idx]->ReturnPos(0) >= 10.0f) {
+                    sys.bDir = false;
                 }
-                glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(ObjSpeed, 0.0f, 0.0f));
-                gameobj[idx]->SetTrans_Matrix(Temp,0);
+                glm::mat4 Temp = glm::translate(gameobj[sys.idx]->GetTransform_Matrix(), glm::vec3(sys.ObjSpeed, 0.0f, 0.0f));
+                gameobj[sys.idx]->SetTrans_Matrix(Temp, 0);
 
             }
 
-            if (bDir == false) {
-                if (gameobj[idx]->ReturnPos(0)<=-10.0f) {
-                    bDir = true;
+            if (sys.bDir == false) {
+                if (gameobj[sys.idx]->ReturnPos(0) <= -10.0f) {
+                    sys.bDir = true;
                 }
-                glm::mat4 Temp = glm::translate(gameobj[idx]->GetTransform_Matrix(), glm::vec3(-ObjSpeed, 0.0f, 0.0f));
-                //여기서부턴 안건드려도 됨
-                gameobj[idx]->SetTrans_Matrix(Temp,0);
+                glm::mat4 Temp = glm::translate(gameobj[sys.idx]->GetTransform_Matrix(), glm::vec3(-sys.ObjSpeed, 0.0f, 0.0f));
+                gameobj[sys.idx]->SetTrans_Matrix(Temp, 0);
 
             }
-            Objmvp[idx] = gameobj[idx]->GetTransform_Matrix();
+            Objmvp[sys.idx] = gameobj[sys.idx]->GetTransform_Matrix();
             GLuint modelTransformLocation = glGetUniformLocation(s_program, "g_modelTransform");
-            glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[idx]));
+            glUniformMatrix4fv(modelTransformLocation, 1, GL_FALSE, glm::value_ptr(Objmvp[sys.idx]));
         }
     }
-        
 
-    if (idx > 20) { //난이도 조절 카메라 빙글빙글
+
+    if (sys.idx > 20) { //난이도 조절용
         maincam->camDegree -= 10.0f;
     }
     glutPostRedisplay(); // 화면 재 출력
     glutTimerFunc(50, Timerfunction, 1);
 
 }
+void InfoList(int num)
+{
+    /*for (int i = 0; i < RhythmInfo.size(); i++) {
+        cout << RhythmInfo[i].key1 << " ";
+    }
+    cout << '\n'*/;
+
+
+    if (num == 5) {
+        for (int i = 5; i < 13; i++) {
+            cout << RhythmInfo[i].key1 << " ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 13) {
+        for (int i = 13; i < 21; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 21) {
+        for (int i = 21; i < 29; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 29) {
+        for (int i = 29; i < 37; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 37) {
+        for (int i = 37; i < 45; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 45) {
+        for (int i = 45; i < 53; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 53) {
+        for (int i = 53; i < 61; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 61) {
+        for (int i = 61; i < 69; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 69) {
+        for (int i = 69; i < 77; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+
+    if (num == 77) {
+        for (int i = 77; i < 80; i++) {
+            cout << RhythmInfo[i].key1 << "  ";
+        }
+        cout << '\n';
+    }
+        
+
+}
 
 void Mouse(int button, int state, int x, int y)
 {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-       /*xp= ((float)x / 800.0 * 2) - 1;
-       yp= -(((float)y / 600.0f * 2) - 1);*/
     }
-    //cout << xp << " " << yp << endl;
-   glutPostRedisplay(); // 화면 재 출력
+    glutPostRedisplay(); // 화면 재 출력
 }
 
 void SpecialKeyboard(int key, int x, int y)
